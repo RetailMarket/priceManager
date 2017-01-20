@@ -1,10 +1,20 @@
 package main
 
 import (
-	"Retail/openKart/routes"
+	"Retail/priceManager/routes"
+	"Retail/priceManager/database"
+	//"Retail/priceManager/jobs"
+	"Retail/priceManager/seeds"
 )
 
 func main() {
-	routes.HandleRequest()
-}
+	db := database.OpenDatabase()
+	defer db.Close()
 
+	// for seeding the price table
+	seeds.UploadSeedData(db)
+	database.CleanUpUpdatePriceRequestTable(db)
+
+	//jobs.SendUpdatePriceForApprovalJob(db)
+	routes.HandleRequest(db)
+}
