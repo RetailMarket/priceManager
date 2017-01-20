@@ -1,0 +1,19 @@
+Products:
+ - P1:
+    product_id: 1001
+    product_name: Pen
+    cost: 10
+    status: Pending
+    version: 1.0
+ - P2:
+    product_id: 1002
+    product_name: Pencil
+    cost: 5
+    status: Pending
+    version: 1.0
+ - P3:
+    product_id: 1003
+    product_name: Rubber
+    cost: 3
+    status: Pending
+    version: 1.0
