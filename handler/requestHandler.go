@@ -4,34 +4,29 @@ import (
 	"github.com/gin-gonic/gin"
 	"fmt"
 	"strconv"
-	"database/sql"
 	"Retail/priceManager/model"
 	"Retail/priceManager/database"
 	"Retail/priceManager/status"
 	"log"
 )
 
-func SaveUpdatePrice(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func SaveUpdatePrice(c *gin.Context) {
+	name := c.Query("name")
+	id := parseId(c)
 
-		name := c.Query("name")
-		id := parseId(c)
+	price := parsePrice(c)
 
+	database.ValidateEntryPresence(id);
 
-		price := parsePrice(c)
+	fmt.Printf("updating %s to cost %.2f\n", name, price)
 
-		database.ValidateEntryPresence(db, id);
+	updatedPrice := model.Product{}
+	updatedPrice.Product_id = id
+	updatedPrice.Product_name = name
+	updatedPrice.Cost = price
+	updatedPrice.Status = status.PENDING
 
-		fmt.Printf("updating %s to cost %.2f\n", name, price)
-
-		updatedPrice := model.Price{}
-		updatedPrice.Product_id = id
-		updatedPrice.Product_name = name
-		updatedPrice.Cost = price
-		updatedPrice.Status = status.PENDING
-
-		database.SavePriceInUpdateTable(db, &updatedPrice);
-	}
+	database.SavePriceInUpdateTable(&updatedPrice);
 }
 
 func parsePrice(c *gin.Context) float64 {
