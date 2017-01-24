@@ -2,14 +2,13 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"database/sql"
 	"Retail/priceManager/handler"
 )
 
-func HandleRequest(db *sql.DB) {
+func HandleRequest() {
 	router := gin.Default()
 
-	router.POST("/price/update", handler.SaveUpdatePrice(db))
+	router.POST("/price/update", handler.SaveUpdatePrice)
 
 	router.Run(":4000")
 }
