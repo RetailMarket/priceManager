@@ -1,6 +1,8 @@
-hash: e75d72577c8d01d269bb1cdbb64a1a6f80616a92441b731b6cd7ca186382231d
-updated: 2017-01-18T12:06:26.417671283+05:30
+hash: 071689d9f8e36511120bfd2a4e6a2141cedbb6f9ba99c80f7ad75baa7707ab3b
+updated: 2017-01-20T15:35:33.7342014+05:30
 imports:
+- name: github.com/bmizerany/pq
+  version: da2b95e392c172df0be322eadc19a90b0f771548
 - name: github.com/gin-gonic/gin
   version: e2212d40c62a98b388a5eb48ecbdcf88534688ba
   subpackages:
