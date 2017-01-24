@@ -1,20 +1,27 @@
 package main
 
 import (
-	"Retail/priceManager/routes"
 	"Retail/priceManager/database"
-	//"Retail/priceManager/jobs"
+	"Retail/priceManager/client"
 	"Retail/priceManager/seeds"
+	"Retail/priceManager/jobs"
+	_"Retail/priceManager/routes"
 )
 
 func main() {
-	db := database.OpenDatabase()
-	defer db.Close()
+	database.Init();
+	defer database.CloseDb();
 
-	// for seeding the price table
-	seeds.UploadSeedData(db)
-	database.CleanUpUpdatePriceRequestTable(db)
+	// seeding data into DB.
+	seeds.UploadSeedForPriceTable();
+	seeds.UploadSeedForPriceUpdateRequestTable();
 
-	//jobs.SendUpdatePriceForApprovalJob(db)
-	routes.HandleRequest(db)
+	workflowClient, conn := client.CreateClientConnection();
+
+	// closing client connection.
+	defer conn.Close();
+
+	// running job for sending update price record for approval.
+	jobs.SendUpdatePriceForApprovalJob(workflowClient)
+	//routes.HandleRequest()
 }
