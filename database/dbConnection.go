@@ -4,17 +4,18 @@ import (
 	"database/sql"
 	"Retail/priceManager/model"
 	_ "github.com/bmizerany/pq"
+	priceClient "github.com/RetailMarket/priceManagerClient"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
+	"Retail/priceManager/status"
 )
 
 const (
 	DB_DRIVER = "postgres"
 	DB_CONNECTION = "user=postgres dbname=postgres password=postgres sslmode=disable"
 	SCHEMA = "price"
-	PRICE_UPDATE_REQUEST_TABLE = "priceUpdateRequest"
 	PRICE_TABLE = "price"
 )
 
@@ -64,7 +65,7 @@ func SavePriceInUpdateTable(priceObj *model.Product) {
 	}
 	fmt.Println("Inserting record into priceUpdateRequest table...")
 	insertQuery := fmt.Sprintf("insert into %s.%s (product_id, product_name,cost,status) values(%s,%s,%s,%s)", SCHEMA,
-		PRICE_UPDATE_REQUEST_TABLE,
+		PRICE_TABLE,
 		priceObj.Product_id,
 		priceObj.Product_name,
 		priceObj.Cost,
@@ -94,7 +95,7 @@ func ValidateEntryPresence(id int) {
 }
 
 func GetUpdateRequestEntriesWithStatus(status string, tx sql.Tx) *sql.Rows {
-	selectQuery := fmt.Sprintf("select product_id, product_name, cost from %s.%s where status='%s'", SCHEMA, PRICE_UPDATE_REQUEST_TABLE, status);
+	selectQuery := fmt.Sprintf("select product_id, product_name, cost from %s.%s where status='%s'", SCHEMA, PRICE_TABLE, status);
 	fmt.Println(selectQuery);
 	entries, err := tx.Query(selectQuery)
 	if (err != nil) {
@@ -103,11 +104,15 @@ func GetUpdateRequestEntriesWithStatus(status string, tx sql.Tx) *sql.Rows {
 	return entries;
 }
 
-func ChangeStatusFrom(oldStatus string, newStatus string, tx sql.Tx) error {
-	updateQuery := fmt.Sprintf("update %s.%s set status = '%s' where status = '%s'", SCHEMA, PRICE_UPDATE_REQUEST_TABLE, newStatus, oldStatus)
-
-	_, err := tx.Exec(updateQuery)
-	return err;
+func ChangeStatusTo(status string, records []*priceClient.ProductEntry) error {
+	for i := 0; i < len(records); i++ {
+		updateQuery := fmt.Sprintf("update %s.%s set status = '%s' where product_id = %d and version = '%s'", SCHEMA, PRICE_TABLE, status, int(records[i].ProductId), records[i].Version)
+		_, err := db.Exec(updateQuery)
+		if (err != nil) {
+			return err;
+		}
+	}
+	return nil;
 }
 
 func SwitchToLatest(ids []int32) error {
@@ -136,7 +141,7 @@ func SwitchToLatest(ids []int32) error {
 }
 
 func GetPriceUpdateRequests() (*sql.Rows, error) {
-	selectQuery := fmt.Sprintf("select product_id, version from %s.%s inner join (select product_id pId, max(version) maxV from %s.%s group by product_id) latestVersions on product_id = latestVersions.pId and version = latestVersions.maxV where is_latest = false", SCHEMA, PRICE_TABLE, SCHEMA, PRICE_TABLE);
+	selectQuery := fmt.Sprintf("select product_id, version from %s.%s inner join (select product_id pId, max(version) maxV from %s.%s group by product_id) latestVersions on product_id = latestVersions.pId and version = latestVersions.maxV where is_latest = false and status = '%s'", SCHEMA, PRICE_TABLE, SCHEMA, PRICE_TABLE, status.PENDING);
 
 	fmt.Printf("Executing Query %s\n", selectQuery);
 	return db.Query(selectQuery)
