@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"Retail/priceManager/database"
 	"golang.org/x/net/context"
+	"Retail/priceManager/status"
 )
 
 const (
@@ -44,7 +45,7 @@ func (s *server) SwitchToLatestVersion(ctx context.Context, idContainer *priceCl
 	return &priceClient.ChangeLatestResponse{Message: message}, err
 }
 
-func (s *server) GetPriceUpdateRecords(ctx context.Context, idContainer *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
+func (s *server) GetPriceUpdateRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
 	records, err := database.GetPriceUpdateRequests();
 	response := &priceClient.FetchRecordsResponse{}
 	if (err != nil) {
@@ -54,11 +55,22 @@ func (s *server) GetPriceUpdateRecords(ctx context.Context, idContainer *priceCl
 			var product_id int32;
 			var version string;
 			records.Scan(&product_id, &version)
-			record := priceClient.UpdateProductPriceEntry{
+			record := priceClient.ProductEntry{
 				ProductId: product_id,
 				Version: version}
 			response.Products = append(response.Products, &record)
 		}
 	}
 	return response, err
+}
+
+func (s *server) ChangeStatusToPicked(ctx context.Context, request *priceClient.ChangeStatusRequest) (*priceClient.ChangeStatusResponse, error) {
+	records := request.GetProducts();
+	err := database.ChangeStatusTo(status.PICKED, records);
+
+	message := fmt.Sprintf("Successfully changed status of %v to picked", records);
+	if (err != nil) {
+		message = fmt.Sprintf("Failed to change status of %v to picked", records);
+	}
+	return &priceClient.ChangeStatusResponse{Message: message}, err
 }
