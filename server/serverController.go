@@ -74,3 +74,14 @@ func (s *server) ChangeStatusToPicked(ctx context.Context, request *priceClient.
 	}
 	return &priceClient.ChangeStatusResponse{Message: message}, err
 }
+
+func (s *server) ChangeStatusToCompleted(ctx context.Context, request *priceClient.ChangeStatusRequest) (*priceClient.ChangeStatusResponse, error) {
+	records := request.GetProducts();
+	err := database.ChangeStatusTo(status.COMPLETED, records);
+
+	message := fmt.Sprintf("Successfully changed status of %v to completed", records);
+	if (err != nil) {
+		message = fmt.Sprintf("Failed to change status of %v to picked", records);
+	}
+	return &priceClient.ChangeStatusResponse{Message: message}, err
+}
