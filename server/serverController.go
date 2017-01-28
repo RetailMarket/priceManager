@@ -34,17 +34,6 @@ func CreateServerConnection() {
 	}
 }
 
-func (s *server) SwitchToLatestVersion(ctx context.Context, idContainer *priceClient.ChangeLatestRequest) (*priceClient.ChangeLatestResponse, error) {
-	ids := idContainer.GetProductId();
-	err := database.SwitchToLatest(ids);
-	message := "";
-	if (err != nil) {
-		message = fmt.Sprintf("Failed to switch set new prices to latest Ids: %v", ids);
-	}
-	message = fmt.Sprintf("Successfully set the new prices for Ids: %v", ids);
-	return &priceClient.ChangeLatestResponse{Message: message}, err
-}
-
 func (s *server) GetPriceUpdateRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
 	records, err := database.GetPriceUpdateRequests();
 	response := &priceClient.FetchRecordsResponse{}
@@ -55,33 +44,64 @@ func (s *server) GetPriceUpdateRecords(ctx context.Context, _ *priceClient.Fetch
 			var product_id int32;
 			var version string;
 			records.Scan(&product_id, &version)
-			record := priceClient.ProductEntry{
+			record := priceClient.Entry{
 				ProductId: product_id,
 				Version: version}
-			response.Products = append(response.Products, &record)
+			response.Entries = append(response.Entries, &record)
 		}
 	}
 	return response, err
 }
 
-func (s *server) ChangeStatusToPicked(ctx context.Context, request *priceClient.ChangeStatusRequest) (*priceClient.ChangeStatusResponse, error) {
-	records := request.GetProducts();
-	err := database.ChangeStatusTo(status.PICKED, records);
+func (s *server) NotifySuccessfullyPicked(ctx context.Context, request *priceClient.NotifyRequest) (*priceClient.NotifyResponse, error) {
+	records := request.GetEntries();
+	response := &priceClient.NotifyResponse{}
 
-	message := fmt.Sprintf("Successfully changed status of %v to picked", records);
+	tx, err := database.GetDb().Begin();
 	if (err != nil) {
-		message = fmt.Sprintf("Failed to change status of %v to picked", records);
+		response.Message = fmt.Sprintln("Error while creating database transection");
+		return response, err;
 	}
-	return &priceClient.ChangeStatusResponse{Message: message}, err
+
+	err = database.ChangeStatusTo(tx, status.PICKED, records);
+
+	if (err != nil) {
+		tx.Rollback();
+		response.Message = fmt.Sprintf("Failed to change status of %v to picked", records);
+	} else {
+		tx.Commit();
+		response.Message = fmt.Sprintf("Successfully changed status of %v to picked", records);
+	}
+
+	return response, err
 }
 
-func (s *server) ChangeStatusToCompleted(ctx context.Context, request *priceClient.ChangeStatusRequest) (*priceClient.ChangeStatusResponse, error) {
-	records := request.GetProducts();
-	err := database.ChangeStatusTo(status.COMPLETED, records);
+func (s *server) NotifySuccessfullyProcessed(ctx context.Context, request *priceClient.NotifyRequest) (*priceClient.NotifyResponse, error) {
+	records := request.GetEntries();
+	tx, err := database.GetDb().Begin();
+	message := fmt.Sprintf("Successfully changed status to completed and set %v to latest", records);
+	response := &priceClient.NotifyResponse{Message:message}
 
-	message := fmt.Sprintf("Successfully changed status of %v to completed", records);
 	if (err != nil) {
-		message = fmt.Sprintf("Failed to change status of %v to picked", records);
+		response.Message = fmt.Sprintln("Error while creating database transection");
+		return response, err;
 	}
-	return &priceClient.ChangeStatusResponse{Message: message}, err
+
+	err = database.ChangeStatusTo(tx, status.COMPLETED, records);
+
+	if (err != nil) {
+		tx.Rollback();
+		response.Message = fmt.Sprintf("Failed to change status of %v to picked", records);
+		log.Print(response.Message)
+		return response, err
+	} else {
+		err = database.SwitchToLatest(tx, records)
+		if (err != nil) {
+			tx.Rollback()
+			response.Message = fmt.Sprintf("unable to set %v to latest", records)
+			log.Print(response.Message)
+			return response, err
+		}
+	}
+	return response, err
 }
