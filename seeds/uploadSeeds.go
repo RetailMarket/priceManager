@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"Retail/priceManager/database"
 	"Retail/priceManager/status"
+	"log"
 )
 
 type Product struct {
@@ -55,9 +56,12 @@ func UploadSeedForPriceTable() {
 
 	for i := 0; i < len(config.Products); i++ {
 		product := config.Products[i];
-		_, err := db.Exec("insert into price.price (product_id,product_name,cost,version,status,is_latest) values ($1,$2,$3, $4,$5,$6)", product.product_id, product.product_name, product.cost, product.version, product.status, product.is_latest)
+		insertQuery := fmt.Sprintf("insert into price.price (product_id,product_name,cost,version,status,is_latest) values (%d,'%s',%d,'%s','%s',%t)", product.product_id, product.product_name, product.cost, product.version, product.status, product.is_latest)
+		log.Println(insertQuery)
+		_, err := db.Exec(insertQuery)
 		if (err != nil) {
-			panic(err)
+			log.Printf("Error %v", err)
+			return;
 		}
 	}
 	fmt.Println("Seed successful for price table :)")
