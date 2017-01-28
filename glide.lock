@@ -1,5 +1,5 @@
 hash: 409dd9cf0fc6ff7b2a46130c251cc8a29a67c939600437ca790e5b1102bf5e5d
-updated: 2017-01-27T12:27:12.798070598+05:30
+updated: 2017-01-27T14:56:24.098200605+05:30
 imports:
 - name: github.com/bmizerany/pq
   version: da2b95e392c172df0be322eadc19a90b0f771548
@@ -11,7 +11,7 @@ imports:
   - proto
   - protoc-gen-go/descriptor
 - name: github.com/RetailMarket/priceManagerClient
-  version: 91205d292f832837a234aca6d0ab5c099ce3d275
+  version: 25b129dfa5fef887cdacfa13f81ea5245ef49db2
 - name: github.com/RetailMarket/workFlowClient
   version: 9896562e92fe077c1322fdc42639183a68040d47
 - name: golang.org/x/net
