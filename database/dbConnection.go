@@ -38,24 +38,16 @@ func CloseDb() {
 	db.Close()
 }
 
-func getTx() *sql.Tx {
-	tx, err := db.Begin();
-	if err != nil {
-		log.Fatalf("Unable to create transection \n Error %v", err);
-	}
-	return tx;
-}
-
-func joinIds(ids []int32) string {
+func joinProductIds(records []*priceClient.Entry) string {
 	idsText := []string{}
 
-	for i := range ids {
-		number := ids[i]
+	for i := range records {
+		number := records[i].ProductId
 		text := strconv.Itoa(int(number))
 		idsText = append(idsText, text)
 	}
 
-	return strings.Join(idsText, "+")
+	return strings.Join(idsText, ",")
 }
 
 func SavePriceInUpdateTable(priceObj *model.Product) {
@@ -104,10 +96,10 @@ func GetUpdateRequestEntriesWithStatus(status string, tx sql.Tx) *sql.Rows {
 	return entries;
 }
 
-func ChangeStatusTo(status string, records []*priceClient.ProductEntry) error {
+func ChangeStatusTo(tx *sql.Tx, status string, records []*priceClient.Entry) error {
 	for i := 0; i < len(records); i++ {
 		updateQuery := fmt.Sprintf("update %s.%s set status = '%s' where product_id = %d and version = '%s'", SCHEMA, PRICE_TABLE, status, int(records[i].ProductId), records[i].Version)
-		_, err := db.Exec(updateQuery)
+		_, err := tx.Exec(updateQuery)
 		if (err != nil) {
 			return err;
 		}
@@ -115,29 +107,24 @@ func ChangeStatusTo(status string, records []*priceClient.ProductEntry) error {
 	return nil;
 }
 
-func SwitchToLatest(ids []int32) error {
-	tx := getTx();
+func SwitchToLatest(tx *sql.Tx, records []*priceClient.Entry) error {
+	formattedIds := joinProductIds(records);
 
-	formattedIds := joinIds(ids);
-	setCurrentVersionToNotLatestQuery := fmt.Sprintf("update %s.%s set is_latest = 'false' where product_id in (%s) and is_latest = true ", SCHEMA, PRICE_TABLE, formattedIds)
+	setCurrentVersionToNotLatestQuery := fmt.Sprintf("update %s.%s set is_latest = false where product_id in (%s) and is_latest = true ", SCHEMA, PRICE_TABLE, formattedIds)
 
 	_, err := tx.Exec(setCurrentVersionToNotLatestQuery);
-	if err != nil {
-		tx.Rollback();
-		return err;
-		log.Fatalf("Error while setting the current version to not latest \nError: %v", err);
+
+	for i := range records {
+		setToLatestVersionQuery := fmt.Sprintf("update %s.%s set is_latest = true where product_id = %d and version = '%s'", SCHEMA, PRICE_TABLE, int(records[i].ProductId), records[i].Version);
+		_, err = tx.Exec(setToLatestVersionQuery);
+		if (err != nil) {
+			return err;
+		}
 	}
-	setToLatestVersionQuery := fmt.Sprintf("update %s.%s set is_latest = 'true' from (select product_id pId, max(version) maxV from %s.%s group by product_id) as latestVersions where product_id = latestVersion.pid and version = latestVersions.maxV and product_id in %s", SCHEMA, PRICE_TABLE, SCHEMA, PRICE_TABLE, formattedIds);
+	//setToLatestVersionQuery := fmt.Sprintf("update %s.%s set is_latest = 'true' from (select product_id pId, max(version) maxV from %s.%s group by product_id) as latestVersions where product_id = latestVersion.pId and version = latestVersions.maxV and product_id in (%s)", SCHEMA, PRICE_TABLE, SCHEMA, PRICE_TABLE, formattedIds);
+	//fmt.Print(setToLatestVersionQuery)
 
-	_, err = tx.Exec(setToLatestVersionQuery);
-
-	if err != nil {
-		tx.Rollback();
-		return err;
-		log.Fatalf("Error while setting the updated price to latest \nError: %v", err);
-	}
-
-	return nil;
+	return err;
 }
 
 func GetPriceUpdateRequests() (*sql.Rows, error) {
