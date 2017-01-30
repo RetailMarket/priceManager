@@ -26,25 +26,25 @@ func UploadSeedForPriceTable() {
 
 	var config Config
 
-	p1 := Product{product_id: 1001, product_name: "Pen", cost: 10, version:"v1", status: status.PENDING, is_latest:false}
-	p2 := Product{product_id: 1001, product_name: "Pen", cost: 12, version:"v2", status: status.PENDING, is_latest:true}
+	p1 := Product{product_id: 1001, product_name: "Pen", cost: 10, version:"v1", status: status.COMPLETED, is_latest:false}
+	p2 := Product{product_id: 1001, product_name: "Pen", cost: 12, version:"v2", status: status.COMPLETED, is_latest:true}
 	p3 := Product{product_id: 1001, product_name: "Pen", cost: 14, version:"v3", status: status.PENDING, is_latest:false}
 
-	p4 := Product{product_id: 1002, product_name: "Pencil", cost: 4, version:"v1", status: status.PENDING, is_latest:true}
+	p4 := Product{product_id: 1002, product_name: "Pencil", cost: 4, version:"v1", status: status.COMPLETED, is_latest:true}
 	p5 := Product{product_id: 1002, product_name: "Pencil", cost: 6, version:"v2", status: status.PENDING, is_latest:false}
 
-	p6 := Product{product_id: 1003, product_name: "Rubber", cost: 2, version:"v1", status: status.PENDING, is_latest:false}
-	p7 := Product{product_id: 1003, product_name: "Rubber", cost: 3, version:"v2", status: status.PENDING, is_latest:false}
-	p8 := Product{product_id: 1003, product_name: "Rubber", cost: 5, version:"v3", status: status.PENDING, is_latest:true}
+	p6 := Product{product_id: 1003, product_name: "Rubber", cost: 2, version:"v1", status: status.COMPLETED, is_latest:false}
+	p7 := Product{product_id: 1003, product_name: "Rubber", cost: 3, version:"v2", status: status.COMPLETED, is_latest:false}
+	p8 := Product{product_id: 1003, product_name: "Rubber", cost: 5, version:"v3", status: status.COMPLETED, is_latest:true}
 	p9 := Product{product_id: 1003, product_name: "Rubber", cost: 8, version:"v4", status: status.PENDING, is_latest:false}
 
-	p10 := Product{product_id: 1004, product_name: "Sticky", cost: 10, version:"v1", status: status.PENDING, is_latest:false}
-	p11 := Product{product_id: 1004, product_name: "Sticky", cost: 13, version:"v2", status: status.PENDING, is_latest:true}
+	p10 := Product{product_id: 1004, product_name: "Sticky", cost: 10, version:"v1", status: status.COMPLETED, is_latest:false}
+	p11 := Product{product_id: 1004, product_name: "Sticky", cost: 13, version:"v2", status: status.COMPLETED, is_latest:true}
 
-	p12 := Product{product_id: 1005, product_name: "chart", cost: 5, version:"v1", status: status.PENDING, is_latest:true}
+	p12 := Product{product_id: 1005, product_name: "chart", cost: 5, version:"v1", status: status.COMPLETED, is_latest:true}
 
-	p13 := Product{product_id: 1006, product_name: "global map", cost: 2, version:"v1", status: status.PENDING, is_latest:false}
-	p14 := Product{product_id: 1006, product_name: "global map", cost: 3, version:"v2", status: status.PENDING, is_latest:true}
+	p13 := Product{product_id: 1006, product_name: "global map", cost: 2, version:"v1", status: status.COMPLETED, is_latest:false}
+	p14 := Product{product_id: 1006, product_name: "global map", cost: 3, version:"v2", status: status.COMPLETED, is_latest:true}
 	p15 := Product{product_id: 1006, product_name: "global map", cost: 4, version:"v3", status: status.PENDING, is_latest:false}
 
 	config.Products = append(config.Products, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
