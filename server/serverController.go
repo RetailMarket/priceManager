@@ -38,7 +38,7 @@ func (s *server) GetPriceUpdateRecords(ctx context.Context, _ *priceClient.Fetch
 	records, err := database.GetPriceUpdateRequests();
 	response := &priceClient.FetchRecordsResponse{}
 	if (err != nil) {
-		log.Fatalf("Query failed while selecting update request \n err: %v", err)
+		log.Printf("Query failed while selecting update request \n err: %v", err)
 	} else {
 		for records.Next() {
 			var product_id int32;
@@ -92,16 +92,16 @@ func (s *server) NotifySuccessfullyProcessed(ctx context.Context, request *price
 	if (err != nil) {
 		tx.Rollback();
 		response.Message = fmt.Sprintf("Failed to change status of %v to picked", records);
-		log.Print(response.Message)
 		return response, err
 	} else {
 		err = database.SwitchToLatest(tx, records)
 		if (err != nil) {
 			tx.Rollback()
 			response.Message = fmt.Sprintf("unable to set %v to latest", records)
-			log.Print(response.Message)
 			return response, err
 		}
 	}
+
+	tx.Commit();
 	return response, err
 }
