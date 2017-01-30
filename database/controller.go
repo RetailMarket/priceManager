@@ -56,6 +56,10 @@ func SwitchToLatest(tx *sql.Tx, records []*priceClient.Entry) error {
 	return err;
 }
 
-func GetPriceUpdateRequests() (*sql.Rows, error) {
+func PriceUpdateRequests() (*sql.Rows, error) {
 	return db.Query(query.GetPendingRecordsQuery())
+}
+
+func AllRecords() (*sql.Rows, error) {
+	return db.Query(query.GetAllRecordsQuery())
 }

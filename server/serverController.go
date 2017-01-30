@@ -34,8 +34,8 @@ func CreateServerConnection() {
 	}
 }
 
-func (s *server) GetPriceUpdateRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
-	records, err := database.GetPriceUpdateRequests();
+func (s *server) PriceUpdateRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
+	records, err := database.PriceUpdateRequests();
 	response := &priceClient.FetchRecordsResponse{}
 	if (err != nil) {
 		log.Printf("Query failed while selecting update request \n err: %v", err)
@@ -103,5 +103,24 @@ func (s *server) NotifySuccessfullyProcessed(ctx context.Context, request *price
 	}
 
 	tx.Commit();
+	return response, err
+}
+
+func (s *server) AllRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
+	records, err := database.AllRecords();
+	response := &priceClient.FetchRecordsResponse{}
+	if (err != nil) {
+		log.Printf("Query failed while selecting all records \n err: %v", err)
+	} else {
+		for records.Next() {
+			var product_id int32;
+			var version string;
+			records.Scan(&product_id, &version)
+			record := priceClient.Entry{
+				ProductId: product_id,
+				Version: version}
+			response.Entries = append(response.Entries, &record)
+		}
+	}
 	return response, err
 }

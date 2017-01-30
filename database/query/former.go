@@ -41,3 +41,7 @@ func SetToLatestQuery(product_id int, version string) string {
 func GetPendingRecordsQuery() string {
 	return fmt.Sprintf("select product_id, version from %s.%s inner join (select product_id pId, max(version) maxV from %s.%s group by product_id) latestVersions on product_id = latestVersions.pId and version = latestVersions.maxV where is_latest = false and status = '%s'", SCHEMA, PRICE_TABLE, SCHEMA, PRICE_TABLE, status.PENDING);
 }
+
+func GetAllRecordsQuery() string {
+	return fmt.Sprintf("select product_id, product_name, version, cost, status, islatest from %s.%s", SCHEMA, PRICE_TABLE);
+}
