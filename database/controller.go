@@ -6,11 +6,15 @@ import (
 	priceClient "github.com/RetailMarket/priceManagerClient"
 	"log"
 	"Retail/priceManager/database/query"
+	"Retail/priceManager/status"
+	"strings"
+	"strconv"
 )
 
 const (
 	DB_DRIVER = "postgres"
 	DB_CONNECTION = "user=postgres dbname=postgres password=postgres sslmode=disable"
+	VERSION_INC = 1
 )
 
 var db *sql.DB;
@@ -62,4 +66,34 @@ func PriceUpdateRequests() (*sql.Rows, error) {
 
 func AllRecords() (*sql.Rows, error) {
 	return db.Query(query.GetAllRecordsQuery())
+}
+
+func SaveEntryForUpdate(tx *sql.Tx, req *priceClient.UpdateEntryRequest) error {
+	var version string;
+	var name string;
+	err := tx.QueryRow(query.GetNewEntryDataQuery(int(req.ProductId))).Scan(&version, &name)
+	if (err != nil) {
+		log.Println("Unable to fetch record values for creating new update request")
+		return err;
+	}
+	entry := &priceClient.Entry{
+		ProductId: req.ProductId,
+		ProductName: name,
+		Version : getNextVersion(version),
+		Cost: req.Cost,
+		Status: status.PENDING,
+		IsLatest: false,
+	}
+	_, err = tx.Exec(query.SaveNewRecordQuery(entry))
+	return err;
+}
+
+func getNextVersion(currentVersion string) string {
+	split := strings.Split(currentVersion, "")
+	prefix := split[0]
+	version, err := strconv.Atoi(strings.Join(split[1:], ""))
+	if (err != nil) {
+		log.Println(err)
+	}
+	return prefix + strconv.Itoa(version + VERSION_INC)
 }

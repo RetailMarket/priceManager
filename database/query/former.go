@@ -43,5 +43,13 @@ func GetPendingRecordsQuery() string {
 }
 
 func GetAllRecordsQuery() string {
-	return fmt.Sprintf("select product_id, product_name, version, cost, status, islatest from %s.%s", SCHEMA, PRICE_TABLE);
+	return fmt.Sprintf("select product_id, product_name, version, cost, status, is_latest from %s.%s", SCHEMA, PRICE_TABLE);
+}
+
+func SaveNewRecordQuery(entry *priceClient.Entry) string {
+	return fmt.Sprintf("insert into %s.%s (product_id,product_name,cost,version,status,is_latest) values (%d,'%s',%d,'%s','%s',%t)", SCHEMA, PRICE_TABLE, entry.ProductId, entry.ProductName, entry.Cost, entry.Version, entry.Status, entry.IsLatest);
+}
+
+func GetNewEntryDataQuery(id int) string {
+	return fmt.Sprintf("select max(version), product_name from %s.%s where product_id = %d group by product_name", SCHEMA, PRICE_TABLE, id);
 }

@@ -115,12 +115,37 @@ func (s *server) AllRecords(ctx context.Context, _ *priceClient.FetchRecordsRequ
 		for records.Next() {
 			var product_id int32;
 			var version string;
-			records.Scan(&product_id, &version)
+			var product_name string;
+			var cost int32;
+			var product_status string;
+			var is_latest bool;
+			records.Scan(&product_id, &product_name, &version, &cost, &product_status, &is_latest)
 			record := priceClient.Entry{
 				ProductId: product_id,
-				Version: version}
+				ProductName:product_name,
+				Version: version,
+				Cost: cost,
+				Status:product_status,
+				IsLatest: is_latest}
 			response.Entries = append(response.Entries, &record)
 		}
 	}
+	return response, err
+}
+
+func (s *server) InsertNewUpdateRequest(ctx context.Context, request *priceClient.UpdateEntryRequest) (*priceClient.UpdateEntryResponse, error) {
+	tx, err := database.GetDb().Begin();
+	response := &priceClient.UpdateEntryResponse{Message:"Successfully inserted new request"}
+	if (err != nil) {
+		response.Message = fmt.Sprintln("Error while creating database transection");
+		return response, err;
+	}
+	err = database.SaveEntryForUpdate(tx, request);
+	if (err != nil) {
+		tx.Rollback();
+		response.Message = "Failed to insert new request"
+		return response, err
+	}
+	tx.Commit();
 	return response, err
 }
