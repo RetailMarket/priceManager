@@ -106,8 +106,8 @@ func (s *server) NotifySuccessfullyProcessed(ctx context.Context, request *price
 	return response, err
 }
 
-func (s *server) AllRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
-	records, err := database.AllRecords();
+func (s *server) AllLatestRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
+	records, err := database.AllLatestRecords();
 	response := &priceClient.FetchRecordsResponse{}
 	if (err != nil) {
 		log.Printf("Query failed while selecting all records \n err: %v", err)
@@ -119,7 +119,7 @@ func (s *server) AllRecords(ctx context.Context, _ *priceClient.FetchRecordsRequ
 			var cost int32;
 			var product_status string;
 			var is_latest bool;
-			records.Scan(&product_id, &product_name, &version, &cost, &product_status, &is_latest)
+			records.Scan(&product_id, &product_name, &cost, &version, &product_status, &is_latest)
 			record := priceClient.Entry{
 				ProductId: product_id,
 				ProductName:product_name,
@@ -133,7 +133,7 @@ func (s *server) AllRecords(ctx context.Context, _ *priceClient.FetchRecordsRequ
 	return response, err
 }
 
-func (s *server) InsertNewUpdateRequest(ctx context.Context, request *priceClient.UpdateEntryRequest) (*priceClient.UpdateEntryResponse, error) {
+func (s *server) InsertPriceUpdateRequest(ctx context.Context, request *priceClient.UpdateEntryRequest) (*priceClient.UpdateEntryResponse, error) {
 	tx, err := database.GetDb().Begin();
 	response := &priceClient.UpdateEntryResponse{Message:"Successfully inserted new request"}
 	if (err != nil) {

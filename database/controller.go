@@ -64,14 +64,14 @@ func PriceUpdateRequests() (*sql.Rows, error) {
 	return db.Query(query.GetPendingRecordsQuery())
 }
 
-func AllRecords() (*sql.Rows, error) {
-	return db.Query(query.GetAllRecordsQuery())
+func AllLatestRecords() (*sql.Rows, error) {
+	return db.Query(query.GetAllLatestRecordsQuery())
 }
 
 func SaveEntryForUpdate(tx *sql.Tx, req *priceClient.UpdateEntryRequest) error {
 	var version string;
 	var name string;
-	err := tx.QueryRow(query.GetNewEntryDataQuery(int(req.ProductId))).Scan(&version, &name)
+	err := tx.QueryRow(query.GetNewEntryDataQuery(int(req.ProductId))).Scan(&name, &version)
 	if (err != nil) {
 		log.Println("Unable to fetch record values for creating new update request")
 		return err;

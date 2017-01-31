@@ -42,8 +42,8 @@ func GetPendingRecordsQuery() string {
 	return fmt.Sprintf("select product_id, version from %s.%s inner join (select product_id pId, max(version) maxV from %s.%s group by product_id) latestVersions on product_id = latestVersions.pId and version = latestVersions.maxV where is_latest = false and status = '%s'", SCHEMA, PRICE_TABLE, SCHEMA, PRICE_TABLE, status.PENDING);
 }
 
-func GetAllRecordsQuery() string {
-	return fmt.Sprintf("select product_id, product_name, version, cost, status, is_latest from %s.%s", SCHEMA, PRICE_TABLE);
+func GetAllLatestRecordsQuery() string {
+	return fmt.Sprintf("select * from %s.%s where is_latest = true", SCHEMA, PRICE_TABLE);
 }
 
 func SaveNewRecordQuery(entry *priceClient.Entry) string {
@@ -51,5 +51,5 @@ func SaveNewRecordQuery(entry *priceClient.Entry) string {
 }
 
 func GetNewEntryDataQuery(id int) string {
-	return fmt.Sprintf("select max(version), product_name from %s.%s where product_id = %d group by product_name", SCHEMA, PRICE_TABLE, id);
+	return fmt.Sprintf("select product_name, max(version) from %s.%s where product_id = %d group by product_name", SCHEMA, PRICE_TABLE, id);
 }

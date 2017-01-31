@@ -1,4 +1,11 @@
 package: Retail/priceManager
 import:
-- package: github.com/gin-gonic/gin
 - package: github.com/RetailMarket/priceManagerClient
+- package: github.com/bmizerany/pq
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/grpc
+  version: v1.0.5
+  subpackages:
+  - reflection

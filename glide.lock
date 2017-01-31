@@ -1,17 +1,15 @@
-hash: 409dd9cf0fc6ff7b2a46130c251cc8a29a67c939600437ca790e5b1102bf5e5d
-updated: 2017-01-31T12:53:21.951347349+05:30
+hash: 17bdece2f9844bf7441c6f2fff1f8aed3654513e2c40ebb01550106c854e5ea9
+updated: 2017-01-31T16:34:34.62697889+05:30
 imports:
 - name: github.com/bmizerany/pq
   version: da2b95e392c172df0be322eadc19a90b0f771548
-- name: github.com/gin-gonic/gin
-  version: e2212d40c62a98b388a5eb48ecbdcf88534688ba
 - name: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
   - proto
   - protoc-gen-go/descriptor
 - name: github.com/RetailMarket/priceManagerClient
-  version: f2f0e59988dbcf4d00ca127c8a39301f3ca32695
+  version: 948053baf33840e614a7456ab74b864f895e5b61
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
@@ -23,7 +21,7 @@ imports:
   - lex/httplex
   - trace
 - name: google.golang.org/grpc
-  version: 21f8ed309495401e6fd79b3a9fd549582aed1b4c
+  version: 708a7f9f3283aa2d4f6132d287d78683babe55c8
   subpackages:
   - codes
   - credentials
