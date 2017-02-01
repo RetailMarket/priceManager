@@ -34,9 +34,10 @@ func CreateServerConnection() {
 	}
 }
 
-func (s *server) PriceUpdateRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
+func (s *server) PendingRecords(ctx context.Context, _ *priceClient.Request) (*priceClient.Records, error) {
 	records, err := database.PriceUpdateRequests();
-	response := &priceClient.FetchRecordsResponse{}
+	response := &priceClient.Records{}
+
 	if (err != nil) {
 		log.Printf("Query failed while selecting update request \n err: %v", err)
 	} else {
@@ -53,9 +54,9 @@ func (s *server) PriceUpdateRecords(ctx context.Context, _ *priceClient.FetchRec
 	return response, err
 }
 
-func (s *server) NotifySuccessfullyPicked(ctx context.Context, request *priceClient.NotifyRequest) (*priceClient.NotifyResponse, error) {
+func (s *server) NotifyRecordsPicked(ctx context.Context, request *priceClient.Records) (*priceClient.Response, error) {
 	records := request.GetEntries();
-	response := &priceClient.NotifyResponse{}
+	response := &priceClient.Response{}
 
 	tx, err := database.GetDb().Begin();
 	if (err != nil) {
@@ -76,11 +77,11 @@ func (s *server) NotifySuccessfullyPicked(ctx context.Context, request *priceCli
 	return response, err
 }
 
-func (s *server) NotifySuccessfullyProcessed(ctx context.Context, request *priceClient.NotifyRequest) (*priceClient.NotifyResponse, error) {
+func (s *server) NotifyRecordsProcessed(ctx context.Context, request *priceClient.Records) (*priceClient.Response, error) {
 	records := request.GetEntries();
 	tx, err := database.GetDb().Begin();
 	message := fmt.Sprintf("Successfully changed status to completed and set %v to latest", records);
-	response := &priceClient.NotifyResponse{Message:message}
+	response := &priceClient.Response{Message:message}
 
 	if (err != nil) {
 		response.Message = fmt.Sprintln("Error while creating database transection");
@@ -106,9 +107,10 @@ func (s *server) NotifySuccessfullyProcessed(ctx context.Context, request *price
 	return response, err
 }
 
-func (s *server) AllLatestRecords(ctx context.Context, _ *priceClient.FetchRecordsRequest) (*priceClient.FetchRecordsResponse, error) {
+func (s *server) LatestRecords(ctx context.Context, _ *priceClient.Request) (*priceClient.Records, error) {
 	records, err := database.AllLatestRecords();
-	response := &priceClient.FetchRecordsResponse{}
+	response := &priceClient.Records{}
+
 	if (err != nil) {
 		log.Printf("Query failed while selecting all records \n err: %v", err)
 	} else {
@@ -133,9 +135,9 @@ func (s *server) AllLatestRecords(ctx context.Context, _ *priceClient.FetchRecor
 	return response, err
 }
 
-func (s *server) InsertPriceUpdateRequest(ctx context.Context, request *priceClient.UpdateEntryRequest) (*priceClient.UpdateEntryResponse, error) {
+func (s *server) InsertRecord(ctx context.Context, request *priceClient.Record) (*priceClient.Response, error) {
 	tx, err := database.GetDb().Begin();
-	response := &priceClient.UpdateEntryResponse{Message:"Successfully inserted new request"}
+	response := &priceClient.Response{Message:"Successfully inserted new request"}
 	if (err != nil) {
 		response.Message = fmt.Sprintln("Error while creating database transection");
 		return response, err;

@@ -68,7 +68,7 @@ func AllLatestRecords() (*sql.Rows, error) {
 	return db.Query(query.GetAllLatestRecordsQuery())
 }
 
-func SaveEntryForUpdate(tx *sql.Tx, req *priceClient.UpdateEntryRequest) error {
+func SaveEntryForUpdate(tx *sql.Tx, req *priceClient.Record) error {
 	var version string;
 	var name string;
 	err := tx.QueryRow(query.GetNewEntryDataQuery(int(req.ProductId))).Scan(&name, &version)
