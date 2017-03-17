@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-goose -env=test -pgschema=price $1
+goose -env=test -pgschema=$1 $2
 echo 'goose completed...'
